@@ -17,6 +17,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using CachingEnabledAPI.Services.Interfaces;
 using CachingEnabledAPI.Repositories.Interfaces;
+using CachingEnabledAPI.Repositories.Implemetations;
+using CachingEnabledAPI.Services.Implementations;
 
 namespace CachingEnabledAPI
 {
@@ -82,6 +84,11 @@ namespace CachingEnabledAPI
             #region Repositories
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddTransient<ICustomerRepository, CustomerRepository>();
+            services.AddTransient<IOrderRepository, OrderRepository>();
+            #endregion
+
+            #region Services
+            services.AddTransient<ICustomerService, CustomerService>();
             #endregion
         }
 

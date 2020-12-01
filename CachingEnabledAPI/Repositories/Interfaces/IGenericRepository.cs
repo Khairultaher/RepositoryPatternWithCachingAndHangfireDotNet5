@@ -9,7 +9,8 @@ namespace CachingEnabledAPI.Repositories.Interfaces
     public interface IGenericRepository<T> where T : Auditable
     {
         Task<T> GetByIdAsync(int id);
-        Task<IReadOnlyList<T>> GetAllAsync();
+        Task<List<T>> GetAllAsync();
+        IQueryable<T> GetAll();
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

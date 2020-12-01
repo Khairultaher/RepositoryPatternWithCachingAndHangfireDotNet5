@@ -27,16 +27,24 @@ namespace CachingEnabledAPI.Repositories
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
-        public async Task<IReadOnlyList<T>> GetAllAsync()
+        public async Task<List<T>> GetAllAsync()
         {
-            if (!_cacheService(cacheTech).TryGet(cacheKey, out IReadOnlyList<T> cachedList))
+            if (!_cacheService(cacheTech).TryGet(cacheKey, out List<T> cachedList))
             {
-                await Task.Delay(10000);
-                cachedList = await _dbContext.Set<T>()
-                    .OrderByDescending(o => o.Id).ToListAsync();
+                cachedList = await _dbContext.Set<T>().OrderByDescending(o => o.Id).ToListAsync();
                 _cacheService(cacheTech).Set(cacheKey, cachedList);
             }
             return cachedList;
+        }
+        public IQueryable<T> GetAll()
+        {
+            return _dbContext.Set<T>();
+        }
+        public async Task RefreshCache()
+        {
+            var cachedList = await _dbContext.Set<T>().OrderByDescending(o => o.Id).ToListAsync();
+            //_cacheService(cacheTech).Remove(cacheKey);
+            _cacheService(cacheTech).Set(cacheKey, cachedList);
         }
         public async Task<T> AddAsync(T entity)
         {
@@ -56,14 +64,6 @@ namespace CachingEnabledAPI.Repositories
             _dbContext.Set<T>().Remove(entity);
             await _dbContext.SaveChangesAsync();
             BackgroundJob.Enqueue(() => RefreshCache());
-        }
-        public async Task RefreshCache()
-        {
-            //await Task.Delay(10000);
-            var cachedList = await _dbContext.Set<T>()
-                .OrderByDescending(o => o.Id).ToListAsync();
-            //_cacheService(cacheTech).Remove(cacheKey);
-            _cacheService(cacheTech).Set(cacheKey, cachedList);
         }
 
         public async Task RefreshCustomersCache()

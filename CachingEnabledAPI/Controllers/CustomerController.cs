@@ -1,6 +1,8 @@
 ﻿
 using CachingEnabledAPI.Models;
 using CachingEnabledAPI.Repositories.Interfaces;
+using CachingEnabledAPI.Services.Interfaces;
+using CachingEnabledAPI.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -16,22 +18,73 @@ namespace CachingEnabledAPI.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerRepository repository;
-        public CustomerController(ICustomerRepository repository)
+        private readonly ICustomerService customerService;
+        public CustomerController(ICustomerRepository repository
+            , ICustomerService customerService)
         {
             this.repository = repository;
+            this.customerService = customerService;
+        }
+
+        [HttpGet("CustomersWithOrderInfo/{skip?}/{take?}")]
+        public async Task<IActionResult> CustomersWithOrderInfo(int skip = 1, int take = 0)
+        {
+            take = (take == 0) ? int.MaxValue : take;
+            Response response = new Response();
+
+            var data = await customerService.CustomersWithOrderInfo(skip, take);
+            response.Data = data; response.TotalRecords = data.Count;
+            return Ok(response);
+        }
+
+
+        [HttpGet("CustomersHasOrder/{skip?}/{take?}")]
+        public async Task<IActionResult> GetCustomersHasOrder(int skip = 1, int take = 0)
+        {
+            take = (take == 0) ? int.MaxValue : take;
+            Response response = new Response();
+
+            var data = await customerService.GetCustomersHasOrder(skip, take);
+            response.Data = data; response.TotalRecords = data.Count;
+            return Ok(response);
+        }
+
+        [HttpGet("CustomersHasNoOrder/{count}/{skip?}/{take?}")]
+        public async Task<IActionResult> GetCustomersHasNoOrder(int count, int skip = 1, int take = 0)
+        {
+            take = (take == 0) ? int.MaxValue : take;
+            Response response = new Response();
+
+            var data = await customerService.GetCustomersHasNoOrder(skip, take);
+            response.Data = data; response.TotalRecords = data.Count;
+            return Ok(response);
+        }
+
+
+        [HttpGet("OrdersWithCustomerInfo/{skip?}/{take?}")]
+        public async Task<IActionResult> GetOrdersWithCustomerInfo(int skip = 1, int take = 0)
+        {
+            take = (take == 0) ? int.MaxValue : take;
+            Response response = new Response();
+
+            var data = await customerService.GetOrdersWithCustomerInfo(skip, take);
+            response.Data = data; response.TotalRecords = data.Count;
+            return Ok(response);
         }
 
         [HttpPost("refreshcustomerscache")]
-        public async Task<IActionResult> RefreshCustomersCache([FromForm] string cacheKey) 
+        public async Task<IActionResult> RefreshCustomersCache([FromForm] string cacheKey)
         {
             await repository.RefreshCustomersCache();
             return Ok();
         }
+
         [HttpGet]
         public async Task<IReadOnlyList<Customer>> Get()
         {
             return await repository.GetAllAsync();
         }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> Get(int id)
         {
