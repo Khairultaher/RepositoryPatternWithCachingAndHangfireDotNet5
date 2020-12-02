@@ -29,7 +29,7 @@ namespace CachingEnabledAPI.Services.Implementations
 
                         //from c in customerRepository.GetAll() // Second approach
                         //                         .Where(w => w.Id == o.CustomerId)
-                        
+
                         select new OrderVM
                         {
                             Id = o.Id,
@@ -41,9 +41,9 @@ namespace CachingEnabledAPI.Services.Implementations
                             CustomerName = c.FirstName,
                             CustomerEmail = c.Email
                         };
-                  
+
             return await Task.FromResult(query.ToList());
-            
+
         }
 
         public async Task<List<CustomerVM>> GetCustomersHasOrder(int skip, int take)
@@ -105,24 +105,46 @@ namespace CachingEnabledAPI.Services.Implementations
 
         public async Task<List<CustomerVM>> CustomersWithOrderInfo(int skip, int take)
         {
-            var query = from c in customerRepository.GetAll()
-                        from o in orderRepository.GetAll()
-                                                 .Where(w => w.CustomerId == c.Id)
-                                                 .DefaultIfEmpty()
-                        select new CustomerVM
-                        {
-                            Id = c.Id,
-                            FirstName = c.FirstName,
-                            LastName = c.LastName,
-                            Contact = c.Contact,
-                            Email = c.Email,
-                            DateOfBirth = c.DateOfBirth,
-                            OrderId = o.Id,
-                            OrderDate = o.OrderDate                   
-                        };
+            await Task.Delay(10);
 
-            return await Task.FromResult(query.ToList());
+            IQueryable<CustomerVM> queryable = (from c in customerRepository.GetAll()
+                                                from o in orderRepository.GetAll()
+                                                                         .Where(w => w.CustomerId == c.Id)
+                                                    //.DefaultIfEmpty()
+                                                select new CustomerVM
+                                                {
+                                                    Id = c.Id,
+                                                    FirstName = c.FirstName,
+                                                    LastName = c.LastName,
+                                                    Contact = c.Contact,
+                                                    Email = c.Email,
+                                                    DateOfBirth = c.DateOfBirth,
+                                                    OrderId = o.Id,
+                                                    OrderDate = o.OrderDate
+                                                });
+
+            IEnumerable<CustomerVM> enumerable = (from c in customerRepository.GetAll()
+                                                  from o in orderRepository.GetAll()
+                                                                           .Where(w => w.CustomerId == c.Id)
+                                                      //.DefaultIfEmpty()
+                                                  select new CustomerVM
+                                                  {
+                                                      Id = c.Id,
+                                                      FirstName = c.FirstName,
+                                                      LastName = c.LastName,
+                                                      Contact = c.Contact,
+                                                      Email = c.Email,
+                                                      DateOfBirth = c.DateOfBirth,
+                                                      OrderId = o.Id,
+                                                      OrderDate = o.OrderDate
+                                                  });
+
+            var data1 = queryable.Where(w => w.Id == 1).ToList();
+
+            var data2 = enumerable.Where(w => w.Id == 1).ToList();
+
+            return data1;
         }
-        
+
     }
 }

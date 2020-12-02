@@ -39,7 +39,8 @@ namespace CachingEnabledAPI
             #region Cache Config
             services.Configure<CacheConfiguration>(Configuration.GetSection("CacheConfiguration"));
 
-            services.AddStackExchangeRedisCache(options => {
+            services.AddStackExchangeRedisCache(options =>
+            {
                 options.Configuration = "localhost:6379";
                 // options.InstanceName = "Inventory";
             });
@@ -70,9 +71,12 @@ namespace CachingEnabledAPI
             #region DB Connection
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                   options.UseSqlServer(
-                       Configuration.GetConnectionString("SqlServerConnection"),
-                       b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+            {
+                options.UseSqlServer(
+                        Configuration.GetConnectionString("SqlServerConnection"),
+                        b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+                
+            });
 
 
             //services.AddDbContext<ApplicationDbContext>(options =>

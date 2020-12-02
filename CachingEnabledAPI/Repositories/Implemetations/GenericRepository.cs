@@ -38,7 +38,8 @@ namespace CachingEnabledAPI.Repositories
         }
         public IQueryable<T> GetAll()
         {
-            return _dbContext.Set<T>();
+            //var ddd = _dbContext.Customers; 
+            return _dbContext.Set<T>().AsNoTracking();
         }
         public async Task RefreshCache()
         {

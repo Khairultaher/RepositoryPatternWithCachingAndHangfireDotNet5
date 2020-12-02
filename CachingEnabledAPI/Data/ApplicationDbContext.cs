@@ -13,6 +13,7 @@ namespace CachingEnabledAPI.Data
         public DbSet<Order> Orders { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
+            ChangeTracker.LazyLoadingEnabled = false;
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
         protected override void OnModelCreating(ModelBuilder builder)
